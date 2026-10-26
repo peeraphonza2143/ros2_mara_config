@@ -1,0 +1,21 @@
+laser_filter:             # 1. ชื่อนี้ต้องตรงกับ Launch File เป๊ะๆ
+  ros__parameters:
+    filter1:
+      name: box_filter
+      type: laser_filters/LaserScanBoxFilter
+      params:
+        box_frame: base_link    # 2. ยึด "ตัวรถ" เป็นหลัก (ห้ามใช้ laser เดี๋ยวงง)
+        
+        # --- โซนกำหนดพื้นที่ (The Box) ---
+        # วาดสี่เหลี่ยมครอบ "ตัวรถ" ไว้ เพื่อตัดจุดที่ LiDAR ยิงโดนตัวรถเองทิ้ง
+
+        min_x: -0.50      # 3. ขอบหลัง: 0.50 m หลัง base_link
+        max_x: 0.20       # 4. ขอบหน้า: 0.20 m หน้า base_link
+
+        min_y: -1.0       # 5. ขอบขวา: 1.0 m จาก base_link
+        max_y: 1.0        # 6. ขอบซ้าย: 1.0 m จาก base_link
+        
+        min_z: -5.5       # 7. ความสูง: ครอบคลุมพื้นถึงเพดาน
+        max_z: 5.0
+        
+        invert: false     # 8. กฎเหล็ก: false = "ลบจุดในกล่องทิ้ง" (เก็บจุดนอกกล่องไว้), true = กลับกัน

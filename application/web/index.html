@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AMR Control</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background:#111; color:#fff; }
+    #pad { width: 250px; height: 250px; margin: 40px auto; border-radius: 50%;
+           background:#222; position: relative; touch-action:none; }
+    #stick { width: 70px; height: 70px; border-radius: 50%; background:#0af;
+             position:absolute; top:90px; left:90px; }
+    #status { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>AMR Manual Control</h2>
+  <div id="status">Connecting...</div>
+  <div id="pad"><div id="stick"></div></div>
+
+  <script src="roslib.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

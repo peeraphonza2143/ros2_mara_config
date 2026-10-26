@@ -1,0 +1,38 @@
+# ──────────────────────────────────────────────────────────────────────────
+# AGV Control App — ค่าตั้งต้น (static config)
+# แก้ไฟล์นี้ใน src/ แล้วต้อง colcon build --packages-select application ใหม่
+#
+# ข้อมูลที่ app เขียนเองระหว่างใช้งาน (Home pose, log) จะไม่อยู่ในไฟล์นี้
+# แต่อยู่ที่ data_dir ด้านล่าง เพื่อไม่ให้ถูกเขียนทับตอน build
+# ──────────────────────────────────────────────────────────────────────────
+
+# launch ที่ปุ่ม START SYSTEM จะเรียก
+launch_package: application
+launch_file: agv_bringup.launch.py
+
+# โฟลเดอร์ที่เก็บไฟล์ route (YAML ที่มี key "waypoints")
+# อ่านจาก src โดยตรง → อัด route ใหม่แล้วกด ⟳ ได้เลย ไม่ต้อง build
+route_dir: ~/ros2_ws/src/my_robot_bringup/config
+
+# ที่เก็บ home_pose.yaml และ logs/
+data_dir: ~/agv_app_data
+
+# ไฟสถานะ: ไม่ได้ข้อความนานเกินกี่วินาทีถือว่า "หาย"
+topic_timeout: 1.0
+
+# ตรวจจับ "หยุดรอ obstacle": ในโหมด AUTO ถ้า |v| และ |w| ต่ำกว่าค่านี้นานเกิน waiting_time
+waiting_speed_threshold: 0.02   # m/s และ rad/s
+waiting_time: 2.0               # s
+
+# คุณภาพ localization จาก AMCL (σ ของตำแหน่ง, เมตร)
+loc_good: 0.15
+loc_fair: 0.30
+
+# Resume: ค้นหา waypoint ที่ใกล้หุ่นที่สุด ในช่วงรอบ ๆ จุดที่ค้างอยู่
+# (กันกรณีเส้นทางวนกลับมาตัดกันเอง แล้วไปเลือกจุดของอีกช่วงหนึ่ง)
+resume_search_back: 5
+resume_search_ahead: 15
+
+# ความไม่แน่นอนตอน Set Home Pose (variance) — เท่ากับค่าที่ RViz ใช้
+initial_cov_xy: 0.25           # m²  (σ = 0.5 m)
+initial_cov_yaw: 0.0685        # rad² (σ ≈ 15°)

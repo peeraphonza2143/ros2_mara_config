@@ -1,0 +1,53 @@
+# EKF (robot_localization) สำหรับ AGV: wheel odom + IMU HWT901B
+# ผลลัพธ์: /odometry/filtered และ TF odom → base_link
+#
+# แนวคิด: fuse เฉพาะ "ความเร็ว" ให้แต่ละเซนเซอร์ทำในสิ่งที่ตัวเองเก่ง
+#   ล้อ  → vx   (ระยะเดินหน้าแม่น)
+#   IMU  → vyaw (การหมุนแม่น ไม่ขึ้นกับล้อลื่น)
+# แล้วให้ EKF integrate เป็นตำแหน่ง/มุมเอง
+# (ถ้า fuse yaw สัมบูรณ์จาก 2 แหล่ง ค่าจะ drift คนละทาง แล้ว EKF จะถูกดึงไปมา)
+#
+# ลำดับของ *_config (15 ค่า):
+#   [ x,     y,     z,
+#     roll,  pitch, yaw,
+#     vx,    vy,    vz,
+#     vroll, vpitch, vyaw,
+#     ax,    ay,    az ]
+ekf_filter_node:
+  ros__parameters:
+    frequency: 50.0            # Hz ที่ EKF คำนวณและ publish
+    sensor_timeout: 0.1        # วินาที ถ้าไม่มีข้อมูลใหม่จะ predict อย่างเดียว
+    two_d_mode: true           # หุ่นวิ่งบนพื้นราบ → ตัด z, roll, pitch ทิ้ง
+    publish_tf: true           # EKF เป็นผู้ publish TF odom → base_link (wheel odom ต้องปิด)
+    publish_acceleration: false
+    print_diagnostics: true
+
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: odom          # ไม่มี GPS / ตำแหน่งสัมบูรณ์ → อ้างอิง odom
+
+    # ── Wheel odometry (/odom จาก wheel_odom_node) ──────────────────
+    odom0: /odom
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  false, false,    # vx
+                   false, false, false,
+                   false, false, false]
+    odom0_queue_size: 10
+    odom0_differential: false
+    odom0_relative: false
+
+    # ── IMU (/imu/data จาก hwt901b_node) ───────────────────────────
+    imu0: /imu/data
+    imu0_config: [false, false, false,
+                  false, false, false,
+                  false, false, false,
+                  false, false, true,      # vyaw (gyro z)
+                  false, false, false]
+    imu0_queue_size: 50         # IMU มา 100 Hz → queue ใหญ่กว่า odom
+    imu0_differential: false
+    imu0_relative: false
+    imu0_remove_gravitational_acceleration: true
+
+    use_control: false
