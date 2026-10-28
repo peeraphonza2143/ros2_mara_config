@@ -1,0 +1,180 @@
+    <!-- ───────── Home (Dashboard) ───────── -->
+    <section data-view="home" class="view view-home">
+
+      <div class="col col-a">
+      <section id="activity-card" class="card status off" aria-live="polite">
+        <div class="status-main">
+          <span id="act-icon" class="status-ring" aria-hidden="true">○</span>
+          <div class="status-body">
+            <p id="act-text" class="status-text">Waiting for robot data…</p>
+            <p id="act-detail" class="status-detail"></p>
+          </div>
+        </div>
+        <ul id="chips" class="chips" aria-label="System readiness" data-i18n-aria="ui.chips.aria"></ul>
+        <details id="ready-details" class="more">
+          <summary data-i18n="ui.ready.summary">System readiness details</summary>
+          <ul id="checks" class="checks">
+            <li class="muted">Waiting for robot data…</li>
+          </ul>
+        </details>
+      </section>
+
+      <section id="mode-card" class="card">
+        <div class="mode-now">
+          <div>
+            <h2 data-i18n="ui.mode.title">System mode</h2>
+            <p id="mode-name" class="mode-name">–</p>
+            <p id="mode-th" class="muted"></p>
+          </div>
+          <span id="mode-state" class="badge off">–</span>
+        </div>
+        <p class="mode-msg" role="status">
+          <span id="mode-spin" class="spin" hidden aria-hidden="true"></span>
+          <span id="mode-msg"></span>
+        </p>
+        <p id="mode-ext" class="mode-ext" hidden></p>
+        <div class="seg" role="group" aria-label="Choose system mode" data-i18n-aria="ui.mode.group">
+          <button type="button" class="seg-btn" data-mode="STANDBY">
+            <svg class="ico"><use href="#i-power"/></svg><span>Standby</span>
+          </button>
+          <button type="button" class="seg-btn" data-mode="MAPPING">
+            <svg class="ico"><use href="#i-map"/></svg><span>Mapping</span>
+          </button>
+          <button type="button" class="seg-btn" data-mode="MANUAL">
+            <svg class="ico"><use href="#i-joystick"/></svg><span>Manual</span>
+          </button>
+          <button type="button" class="seg-btn" data-mode="NAVIGATION">
+            <svg class="ico"><use href="#i-nav"/></svg><span>Navigation</span>
+          </button>
+        </div>
+        <p id="mode-hint" class="note"></p>
+        <button id="mode-login" class="btn ghost" type="button" hidden data-i18n="ui.mode.login">Admin sign in</button>
+        <button id="mode-reset" class="btn ghost danger" type="button" hidden data-i18n="ui.mode.reset">Reset all</button>
+      </section>
+      </div>
+
+      <div class="col col-b">
+      <section id="stats-card" class="card">
+        <h2 data-i18n="ui.stats.title">Statistics</h2>
+        <div class="stat-grid">
+          <div class="stat">
+            <span class="stat-label" data-i18n="ui.stats.dist">Distance today</span>
+            <strong id="st-dist" class="stat-val">–</strong>
+            <small id="st-dist-total" class="stat-sub"></small>
+          </div>
+          <div class="stat">
+            <span class="stat-label" data-i18n="ui.stats.active">Active time today</span>
+            <strong id="st-active" class="stat-val">–</strong>
+            <small id="st-active-total" class="stat-sub"></small>
+          </div>
+          <div class="stat">
+            <span class="stat-label" data-i18n="ui.stats.rounds">Rounds today</span>
+            <strong id="st-rounds" class="stat-val">–</strong>
+            <small id="st-rounds-total" class="stat-sub"></small>
+          </div>
+        </div>
+        <figure class="tl-fig">
+          <figcaption class="tl-title" data-i18n="ui.stats.tl.title">Mode timeline — last 24 hours</figcaption>
+          <div id="tl-track" class="tl-track" role="img"></div>
+          <div id="tl-axis" class="tl-axis" aria-hidden="true"></div>
+          <ul class="tl-legend">
+            <li><span class="tl-key m-NAVIGATION"></span><span id="lg-NAVIGATION"></span></li>
+            <li><span class="tl-key m-MAPPING"></span><span id="lg-MAPPING"></span></li>
+            <li><span class="tl-key m-MANUAL"></span><span id="lg-MANUAL"></span></li>
+          </ul>
+        </figure>
+        <figure class="days-fig">
+          <figcaption class="days-head">
+            <span class="tl-title" data-i18n="ui.stats.days.title">Last 7 days</span>
+            <span class="metric" role="group" aria-label="Chart metric" data-i18n-aria="ui.stats.metric.aria">
+              <button type="button" id="metric-dist" class="metric-btn" aria-pressed="true" data-i18n="ui.stats.metric.dist">Distance</button>
+              <button type="button" id="metric-active" class="metric-btn" aria-pressed="false" data-i18n="ui.stats.metric.active">Active time</button>
+            </span>
+          </figcaption>
+          <div id="days-box" class="chart-box">
+            <svg id="chart-days" class="chart-svg"></svg>
+            <div id="days-tip" class="ch-tip" hidden></div>
+          </div>
+        </figure>
+        <p id="stats-note" class="note" role="status" hidden></p>
+        <details class="tableview">
+          <summary data-i18n="ui.stats.table.summary">View sessions as table</summary>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col" data-i18n="ui.stats.col.mode">Mode</th>
+                  <th scope="col" data-i18n="ui.stats.col.start">Started</th>
+                  <th scope="col" data-i18n="ui.stats.col.dur">Duration</th>
+                </tr>
+              </thead>
+              <tbody id="stats-body"></tbody>
+            </table>
+          </div>
+        </details>
+        <details class="tableview">
+          <summary data-i18n="ui.stats.days.table.summary">View days as table</summary>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col" data-i18n="ui.stats.col.date">Date</th>
+                  <th scope="col" data-i18n="ui.stats.col.dist">Distance</th>
+                  <th scope="col" data-i18n="ui.stats.col.active">Active time</th>
+                </tr>
+              </thead>
+              <tbody id="days-body"></tbody>
+            </table>
+          </div>
+        </details>
+        <button id="stats-reset" class="btn ghost danger" type="button" hidden data-i18n="ui.stats.reset">Reset statistics</button>
+      </section>
+      </div>
+
+      <div class="col col-c">
+      <section id="chart-card" class="card">
+        <h2 data-i18n="ui.chart.title">Speed — last 2 minutes</h2>
+        <figure class="chart">
+          <figcaption class="chart-head">
+            <span data-i18n="ui.chart.fwd">Forward speed</span>
+            <span class="chart-now"><strong id="now-v">–</strong> <small>m/s</small></span>
+          </figcaption>
+          <div id="chart-v-box" class="chart-box">
+            <svg id="chart-v" class="chart-svg"></svg>
+            <div id="chart-v-tip" class="ch-tip" hidden></div>
+          </div>
+        </figure>
+        <figure class="chart">
+          <figcaption class="chart-head">
+            <span data-i18n="ui.chart.turn">Turning speed</span>
+            <span class="chart-now"><strong id="now-w">–</strong> <small>rad/s</small></span>
+          </figcaption>
+          <div id="chart-w-box" class="chart-box">
+            <svg id="chart-w" class="chart-svg"></svg>
+            <div id="chart-w-tip" class="ch-tip" hidden></div>
+          </div>
+        </figure>
+        <details class="tableview">
+          <summary data-i18n="ui.table.summary">View as table</summary>
+          <div class="table-scroll">
+            <table id="speed-table">
+              <thead>
+                <tr>
+                  <th scope="col" data-i18n="ui.table.time">Time</th>
+                  <th scope="col" data-i18n="ui.table.fwd">Forward (m/s)</th>
+                  <th scope="col" data-i18n="ui.table.turn">Turn (rad/s)</th>
+                </tr>
+              </thead>
+              <tbody id="speed-body"></tbody>
+            </table>
+          </div>
+        </details>
+      </section>
+      </div>
+
+      <footer class="foot">
+        <p class="note center" data-i18n="ui.foot.note">
+          The ■ button stops the robot: it stops manual driving in Mapping and Manual mode, and cancels the current trip in Navigation. The E-stop on the robot is always the final safety.
+        </p>
+      </footer>
+    </section>

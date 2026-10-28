@@ -1,0 +1,138 @@
+    <!-- ───────── Waypoint: สร้าง/แก้ Route (ลำดับจุดหมาย) ต่อแผนที่ + สั่งหุ่นวิ่งตาม Route (แถบล่าง) ───────── -->
+    <section data-view="waypoint" class="view view-nav view-wp" hidden>
+      <div class="map-layout">
+        <aside id="wp-left" class="map-side map-left" aria-label="Routes" data-i18n-aria="ui.wp.left_aria">
+          <div class="card">
+            <h2 data-i18n="ui.wp.routes">Routes</h2>
+            <p id="wp-map-name" class="nav-line"></p>
+            <div id="wp-routes" class="wp-routes"></div>
+            <p id="wp-routes-empty" class="note" data-i18n="ui.wp.routes_empty" hidden>No routes on this map yet.</p>
+            <button id="wp-new" class="btn" type="button" disabled data-i18n="ui.wp.new">＋ New route</button>
+            <p id="wp-left-note" class="note" role="status" hidden></p>
+            <p class="note" data-i18n="ui.wp.run_later">Routes are edited here. Running a route will be added in the next update.</p>
+          </div>
+          <div id="line-card" class="card">
+            <h2 data-i18n="ui.line.title">Straight line</h2>
+            <p class="note" data-i18n="ui.line.help">Drive in a perfectly straight line from one point to another, with no re-planning. The robot must already be at the start point, facing along the line.</p>
+            <label class="wp-field" for="line-from"><span data-i18n="ui.line.from">From</span>
+              <select id="line-from"></select></label>
+            <label class="wp-field" for="line-to"><span data-i18n="ui.line.to">To</span>
+              <select id="line-to"></select></label>
+            <p id="line-result" class="nav-line" role="status" hidden></p>
+            <p id="line-status" class="nav-line" role="status" hidden></p>
+            <p id="line-detail" class="note" hidden></p>
+            <p id="line-note" class="note" role="status" hidden></p>
+            <div class="wp-actions">
+              <button id="line-check" class="btn ghost" type="button" disabled data-i18n="ui.line.check">Check the line</button>
+              <button id="line-run" class="btn" type="button" disabled data-i18n="ui.line.run">▶ Drive straight</button>
+              <button id="line-stop" class="btn run-stop" type="button" hidden data-i18n="ui.line.stop">■ Stop</button>
+            </div>
+          </div>
+        </aside>
+
+        <div class="map-center">
+          <div id="wp-map-gate" class="card">
+            <div class="gate-head">
+              <span class="mode-ico"><svg class="ico"><use href="#i-pin"/></svg></span>
+              <h2 data-i18n="ui.wp.title">Waypoint</h2>
+            </div>
+            <p id="wp-map-gate-msg" class="gate-msg"></p>
+          </div>
+          <div id="wp-map-live" class="card" hidden>
+            <h2 data-i18n="ui.wp.map">Route map</h2>
+            <div id="wp-map-box" class="map-box">
+              <canvas id="wp-map-canvas" class="map-canvas" tabindex="0" role="img"></canvas>
+              <p id="wp-map-wait" class="map-wait" data-i18n="ui.nav.map_wait">Waiting for the map from Navigation…</p>
+            </div>
+            <div class="map-tools" role="group" aria-label="Map tools" data-i18n-aria="ui.wp.tools_aria">
+              <button id="wp-tool-select" class="tool-btn wide" type="button" aria-pressed="true" data-i18n="ui.wp.tool_select">Select / move</button>
+              <button id="wp-tool-add" class="tool-btn wide" type="button" aria-pressed="false" data-i18n="ui.wp.tool_add">＋ Add point</button>
+              <button id="wp-tool-path" class="tool-btn wide" type="button" aria-pressed="false" data-i18n="ui.wp.tool_path">Draw path</button>
+              <button id="wp-tool-delete" class="tool-btn wide" type="button" aria-pressed="false" data-i18n="ui.wp.tool_delete">Delete point</button>
+              <button id="wp-zoom-in" class="tool-btn" type="button" aria-label="Zoom in" data-i18n-aria="ui.map.zoom_in">+</button>
+              <button id="wp-zoom-out" class="tool-btn" type="button" aria-label="Zoom out" data-i18n-aria="ui.map.zoom_out">−</button>
+              <button id="wp-fit" class="tool-btn wide" type="button" data-i18n="ui.map.fit">Fit</button>
+              <button id="wp-center" class="tool-btn wide" type="button" data-i18n="ui.map.robot">Robot</button>
+            </div>
+            <p id="wp-help" class="note"></p>
+            <p id="wp-readout" class="slam-summary" hidden></p>
+            <p class="wp-legend note" aria-hidden="true">
+              <span class="wp-key wp-key-ok"></span> <span data-i18n="ui.wp.legend_point">Waypoint</span> ·
+              <span class="wp-key wp-key-sel"></span> <span data-i18n="ui.wp.legend_sel">Selected</span> ·
+              <span class="wp-key wp-key-bad"></span> <span data-i18n="ui.wp.legend_bad">Cannot be reached</span> ·
+              <span class="wp-key wp-key-next"></span> <span data-i18n="ui.wp.legend_next">Next stop</span> ·
+              <span class="wp-key wp-key-done"></span> <span data-i18n="ui.wp.legend_done">Done</span>
+            </p>
+            <p id="wp-map-info" class="note"></p>
+          </div>
+        </div>
+
+        <aside id="wp-right" class="map-side map-right" aria-label="Waypoints" data-i18n-aria="ui.wp.right_aria">
+          <div id="wp-editor" class="card">
+            <h2 id="wp-editor-title" data-i18n="ui.wp.points">Waypoints</h2>
+            <p id="wp-note" class="note" role="status" hidden></p>
+            <div id="wp-form" hidden>
+              <label class="wp-field" for="wp-name"><span data-i18n="ui.wp.route_name">Route name</span>
+                <input id="wp-name" type="text" maxlength="40" autocomplete="off"></label>
+              <label class="wp-field" for="wp-loop"><span data-i18n="ui.wp.loop">Repeat</span>
+                <select id="wp-loop"></select></label>
+              <label class="wp-field" for="wp-mode"><span data-i18n="ui.wp.mode">Driving mode</span>
+                <select id="wp-mode"></select></label>
+              <p id="wp-mode-help" class="note"></p>
+              <ol id="wp-points" class="wp-points"></ol>
+              <button id="wp-auto-all" class="btn ghost" type="button" disabled data-i18n="ui.wp.auto_all">Auto heading for all points</button>
+              <p id="wp-points-empty" class="note" data-i18n="ui.wp.points_empty" hidden>No points yet. Choose “Add point” and tap the map.</p>
+              <div id="wp-detail" class="wp-detail" hidden>
+                <h3 data-i18n="ui.wp.selected">Selected point</h3>
+                <label class="wp-field" for="wp-pname"><span data-i18n="ui.wp.point_name">Name</span>
+                  <input id="wp-pname" type="text" maxlength="40" autocomplete="off"></label>
+                <label class="wp-field" for="wp-pwait"><span data-i18n="ui.wp.point_wait">Wait here (seconds)</span>
+                  <input id="wp-pwait" type="number" min="0" max="600" step="1" inputmode="decimal"></label>
+                <div class="wp-xy">
+                  <label class="wp-field" for="wp-px"><span>x (m)</span>
+                    <input id="wp-px" type="number" step="0.05" inputmode="decimal"></label>
+                  <label class="wp-field" for="wp-py"><span>y (m)</span>
+                    <input id="wp-py" type="number" step="0.05" inputmode="decimal"></label>
+                </div>
+                <label class="wp-check" for="wp-pstop"><input id="wp-pstop" type="checkbox" checked>
+                  <span data-i18n="ui.wp.point_stop">Stop here — slow down, stop and turn to this point’s heading</span></label>
+                <p id="wp-pstop-note" class="note" hidden></p>
+                <label class="wp-check" for="wp-pauto"><input id="wp-pauto" type="checkbox">
+                  <span data-i18n="ui.wp.point_auto">Auto heading — face the next point</span></label>
+                <label class="wp-field" for="wp-pyaw"><span data-i18n="ui.wp.point_yaw">Heading (°)</span>
+                  <input id="wp-pyaw" type="number" step="5" inputmode="decimal"></label>
+                <div class="navpose-rot">
+                  <button id="wp-rot-l" class="tool-btn wide" type="button" aria-label="Rotate left 15°" data-i18n-aria="ui.navpose.rot_l">⟲ 15°</button>
+                  <button id="wp-rot-r" class="tool-btn wide" type="button" aria-label="Rotate right 15°" data-i18n-aria="ui.navpose.rot_r">⟳ 15°</button>
+                </div>
+                <button id="wp-del-point" class="btn ghost danger" type="button" data-i18n="ui.wp.del_point">Delete this point</button>
+              </div>
+              <p id="wp-status" class="nav-line" role="status"></p>
+              <p id="wp-error" class="note wp-error" role="alert" hidden></p>
+              <div class="wp-actions">
+                <button id="wp-save" class="btn" type="button" disabled data-i18n="ui.wp.save">Save route</button>
+                <button id="wp-discard" class="btn ghost" type="button" disabled data-i18n="ui.wp.discard">Discard changes</button>
+                <button id="wp-delete" class="btn ghost danger" type="button" disabled data-i18n="ui.wp.delete">Delete route</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- แถบควบคุมการรัน Route (ตรึงล่างจอ เหนือเมนู) : เริ่ม / พัก-ทำต่อ / หยุด + สถานะ + ความคืบหน้า -->
+      <div id="run-bar" class="run-bar" role="region" aria-label="Route run controls" data-i18n-aria="ui.run.bar_aria">
+        <div class="run-main">
+          <p id="run-status" class="run-status" role="status" aria-live="polite"></p>
+          <p id="run-detail" class="run-detail note" hidden></p>
+          <div id="run-progress" class="run-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
+            <span id="run-progress-fill"></span>
+          </div>
+          <p id="run-note" class="run-note note" role="status" hidden></p>
+        </div>
+        <div class="run-actions">
+          <button id="run-start" class="btn" type="button" disabled data-i18n="ui.run.run">▶ Run route</button>
+          <button id="run-pause" class="btn ghost" type="button" hidden data-i18n="ui.run.pause">⏸ Pause</button>
+          <button id="run-stop" class="btn run-stop" type="button" hidden data-i18n="ui.run.stop">■ Stop route</button>
+        </div>
+      </div>
+    </section>

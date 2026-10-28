@@ -37,9 +37,10 @@ def generate_launch_description():
     map_file = LaunchConfiguration('map_file')
     rviz = LaunchConfiguration('rviz')
 
-    def nav2_node(package, executable, name, **kwargs):
+    def nav2_node(package, executable, name, extra_params=None, **kwargs):
         return Node(package=package, executable=executable, name=name,
-                    output='screen', parameters=[nav2_params], **kwargs)
+                    output='screen',
+                    parameters=[nav2_params] + (extra_params or []), **kwargs)
 
     return LaunchDescription([
 
@@ -69,7 +70,10 @@ def generate_launch_description():
                   remappings=[('cmd_vel', '/cmd_vel')]),
         nav2_node('nav2_planner', 'planner_server', 'planner_server'),
         nav2_node('nav2_behaviors', 'behavior_server', 'behavior_server'),
-        nav2_node('nav2_bt_navigator', 'bt_navigator', 'bt_navigator'),
+        # [s2] BT หยุดรอ: ตัด Spin/BackUp ออกจาก recovery (path เต็มต้องคำนวณตอน launch)
+        nav2_node('nav2_bt_navigator', 'bt_navigator', 'bt_navigator',
+                  extra_params=[{'default_nav_to_pose_bt_xml': os.path.join(
+                      pkg_dir, 'behavior_trees', 'navigate_wait_only.xml')}]),
         nav2_node('nav2_waypoint_follower', 'waypoint_follower', 'waypoint_follower'),
 
         Node(

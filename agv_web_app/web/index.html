@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b437e">
+  <title>AMR Control</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- ไอคอน SVG ฝังในหน้า (ไม่พึ่ง CDN/icon font เพราะ hotspot ของหุ่นไม่มีเน็ต) -->
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-home" viewBox="0 0 24 24">
+      <path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5.5h4V20"/>
+    </symbol>
+    <symbol id="i-nav" viewBox="0 0 24 24">
+      <path d="M12 3 19.5 20.5 12 16.5 4.5 20.5z"/>
+    </symbol>
+    <symbol id="i-map" viewBox="0 0 24 24">
+      <path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z"/><path d="M9 4v13.5M15 6.5V20"/>
+    </symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24">
+      <path d="M12 21.5s-6.5-5.4-6.5-10.8a6.5 6.5 0 0 1 13 0c0 5.4-6.5 10.8-6.5 10.8z"/>
+      <circle cx="12" cy="10.5" r="2.4"/>
+    </symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24">
+      <rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+    </symbol>
+    <symbol id="i-unlock" viewBox="0 0 24 24">
+      <rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/>
+    </symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24">
+      <path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/>
+    </symbol>
+    <symbol id="i-power" viewBox="0 0 24 24">
+      <path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/>
+    </symbol>
+    <symbol id="i-joystick" viewBox="0 0 24 24">
+      <circle cx="12" cy="7" r="3"/><path d="M12 10v6"/><rect x="5" y="16" width="14" height="4.5" rx="2"/>
+    </symbol>
+  </svg>
+
+  <header>
+    <div class="logo"><img src="logo.jpg" alt="MIT PRECISION" width="1046" height="628"></div>
+
+    <!-- โหมดปัจจุบันของหุ่น: อยู่แถบบนทุกหน้า (ถ้าขาดการเชื่อมต่อจะเปลี่ยนเป็นสีเทาและบอกตรงๆ) -->
+    <button id="mode-pill" class="mode-pill off" type="button" aria-live="polite"
+            aria-label="Current robot mode — tap to go to the System mode card"
+            data-i18n-aria="ui.mode_pill.aria">
+      <span class="pill-dot" aria-hidden="true"></span>
+      <span id="pill-text" class="pill-text">Connecting…</span>
+      <span id="pill-spin" class="spin" hidden aria-hidden="true"></span>
+    </button>
+
+    <div class="head-right">
+      <button id="lock" class="icon-btn" type="button" aria-label="Admin sign in">
+        <svg class="ico"><use id="lock-ico" href="#i-lock"/></svg>
+      </button>
+      <!-- Reset all: ปิดระบบหุ่นทั้งหมดเมื่อค้าง (Admin เท่านั้น ต้องผ่านหน้าต่างยืนยันเสมอ) -->
+      <button id="reset-top" class="icon-btn reset" type="button" hidden aria-label="Reset all robot systems"
+              data-i18n-aria="ui.reset.aria">
+        <svg class="ico"><use href="#i-reset"/></svg>
+      </button>
+      <!-- ปุ่มหยุดจริงต้องยกเลิก goal ของ Nav2 → ยังไม่เปิดใช้ (ระหว่างนี้ใช้ E-stop ที่ตัวรถ) -->
+      <button id="stop" class="icon-btn stop" type="button" disabled
+              aria-label="Stop button (available in Mapping and Manual mode)" data-i18n-aria="ui.stop.aria.off">■</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- @include pages/home.html -->
+
+    <!-- @include pages/navigation.html -->
+
+    <!-- @include pages/mapping.html -->
+
+    <!-- @include pages/waypoint.html -->
+    <!-- @include pages/settings.html -->
+    </main>
+
+  <nav class="tabbar" aria-label="Main menu" data-i18n-aria="ui.tabs.aria">
+    <a id="tab-home" class="tab" href="#/home">
+      <svg class="ico"><use href="#i-home"/></svg>Home
+    </a>
+    <a id="tab-mapping" class="tab" href="#/mapping">
+      <svg class="ico"><use href="#i-map"/></svg>Mapping
+    </a>
+    <a id="tab-waypoint" class="tab" href="#/waypoint">
+      <svg class="ico"><use href="#i-pin"/></svg>Waypoint
+    </a>
+    <a id="tab-nav" class="tab" href="#/nav">
+      <svg class="ico"><use href="#i-nav"/></svg>Navigation
+    </a>
+    <a id="tab-settings" class="tab" href="#/settings">
+      <svg class="ico"><use href="#i-gear"/></svg>Settings
+    </a>
+  </nav>
+
+  <dialog id="pin-dialog" aria-labelledby="pin-title">
+    <form id="pin-form" autocomplete="off">
+      <h2 id="pin-title" data-i18n="ui.pin.title">Admin sign in</h2>
+      <label for="pin-input" class="muted" data-i18n="ui.pin.label">Admin PIN</label>
+      <input id="pin-input" type="password" autocomplete="off" maxlength="64" required>
+      <p id="pin-error" class="form-error" role="alert"></p>
+      <div class="dlg-actions">
+        <button type="button" id="pin-cancel" class="btn ghost" data-i18n="ui.cancel">Cancel</button>
+        <button type="submit" id="pin-submit" class="btn" data-i18n="ui.pin.submit">Sign in</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="rename-dialog" aria-labelledby="rename-title">
+    <form id="rename-form" autocomplete="off">
+      <h2 id="rename-title" data-i18n="ui.lib.rename.title">Rename map</h2>
+      <p id="rename-from" class="muted"></p>
+      <label for="rename-input" class="save-label" data-i18n="ui.save.name">Map name</label>
+      <input id="rename-input" type="text" maxlength="48" autocomplete="off" autocapitalize="off" spellcheck="false"
+             aria-describedby="rename-error">
+      <p id="rename-error" class="form-error" role="alert"></p>
+      <div class="dlg-actions">
+        <button type="button" id="rename-cancel" class="btn ghost" data-i18n="ui.cancel">Cancel</button>
+        <button type="submit" id="rename-submit" class="btn" disabled data-i18n="ui.lib.rename.submit">Rename</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+    <div class="dlg-body">
+      <h2 id="confirm-title">Confirm</h2>
+      <p id="confirm-msg"></p>
+      <ul id="confirm-list" class="dlg-list" hidden></ul>
+      <div class="dlg-actions">
+        <button type="button" id="confirm-cancel" class="btn ghost" data-i18n="ui.cancel">Cancel</button>
+        <button type="button" id="confirm-ok" class="btn">Confirm</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="i18n.js"></script>
+  <script src="chart.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

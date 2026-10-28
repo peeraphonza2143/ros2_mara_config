@@ -1,0 +1,113 @@
+    <!-- ───────── Navigation: คลังแผนที่ + ตั้งค่า Nav2 + วางตำแหน่งหุ่น + ส่งไปจุดหมาย ───────── -->
+    <section data-view="nav" class="view view-nav" hidden>
+      <div class="map-layout">
+        <aside id="nav-left" class="map-side map-left" aria-label="Navigation settings" data-i18n-aria="ui.nav.left_aria">
+          <div id="navp-card" class="card">
+            <h2 data-i18n="ui.navp.title">Navigation settings</h2>
+            <p id="navp-hint" class="note"></p>
+            <p id="navp-summary" class="slam-summary"></p>
+            <div id="navp-groups"></div>
+            <p id="navp-note" class="note" role="status" hidden></p>
+            <div class="navp-actions">
+              <button id="navp-apply" class="btn" type="button" disabled data-i18n="ui.navp.apply">Apply now</button>
+              <button id="navp-save" class="btn ghost" type="button" disabled data-i18n="ui.navp.save">Save for next start</button>
+              <button id="navp-restore" class="btn ghost" type="button" data-i18n="ui.navp.reset_all">Restore all defaults</button>
+            </div>
+          </div>
+        </aside>
+
+        <div class="map-center">
+          <div id="nav-map-gate" class="card">
+            <div class="gate-head">
+              <span class="mode-ico"><svg class="ico"><use href="#i-nav"/></svg></span>
+              <h2 data-i18n="ui.nav.title">Navigation</h2>
+            </div>
+            <p id="nav-map-gate-msg" class="gate-msg"></p>
+          </div>
+          <div id="nav-map-live" class="card" hidden>
+            <h2 data-i18n="ui.nav.map">Navigation map</h2>
+            <div id="nav-map-box" class="map-box">
+              <canvas id="nav-map-canvas" class="map-canvas" tabindex="0" role="img"></canvas>
+              <p id="nav-map-wait" class="map-wait" data-i18n="ui.nav.map_wait">Waiting for the map from Navigation…</p>
+            </div>
+            <div class="map-tools">
+              <button id="nav-zoom-in" class="tool-btn" type="button" aria-label="Zoom in" data-i18n-aria="ui.map.zoom_in">+</button>
+              <button id="nav-zoom-out" class="tool-btn" type="button" aria-label="Zoom out" data-i18n-aria="ui.map.zoom_out">−</button>
+              <button id="nav-fit" class="tool-btn wide" type="button" data-i18n="ui.map.fit">Fit</button>
+              <button id="nav-center" class="tool-btn wide" type="button" data-i18n="ui.map.robot">Robot</button>
+            </div>
+            <p id="nav-map-info" class="note"></p>
+          </div>
+        </div>
+
+        <aside id="nav-right" class="map-side map-right" aria-label="Robot position, destination, map and library" data-i18n-aria="ui.nav.right_aria">
+          <div id="navpose-card" class="card">
+            <h2 data-i18n="ui.navpose.title">Robot position</h2>
+            <p id="navpose-status" class="nav-line" role="status"></p>
+            <p id="navpose-help" class="note" hidden></p>
+            <p id="navpose-readout" class="slam-summary" hidden></p>
+            <p id="navpose-note" class="note" role="status" hidden></p>
+            <button id="navpose-start" class="btn" type="button" disabled data-i18n="ui.navpose.set">Set robot position</button>
+            <div id="navpose-edit" class="navpose-edit" hidden>
+              <div class="navpose-rot">
+                <button id="navpose-rot-l" class="tool-btn wide" type="button" aria-label="Rotate left 15°" data-i18n-aria="ui.navpose.rot_l">⟲ 15°</button>
+                <button id="navpose-rot-r" class="tool-btn wide" type="button" aria-label="Rotate right 15°" data-i18n-aria="ui.navpose.rot_r">⟳ 15°</button>
+              </div>
+              <button id="navpose-send" class="btn" type="button" disabled data-i18n="ui.navpose.send">Send position</button>
+              <button id="navpose-cancel" class="btn ghost" type="button" data-i18n="ui.navpose.cancel">Cancel</button>
+            </div>
+            <div id="navstart" class="navstart">
+              <p id="navstart-info" class="note"></p>
+              <p id="navstart-auto" class="note" role="status" hidden></p>
+              <div class="navstart-actions">
+                <button id="navstart-save" class="btn ghost" type="button" disabled data-i18n="ui.navstart.save">Save position as start pose</button>
+                <button id="navstart-apply" class="btn ghost" type="button" disabled data-i18n="ui.navstart.apply">Use start pose now</button>
+                <button id="navstart-clear" class="btn ghost" type="button" disabled data-i18n="ui.navstart.clear">Forget start pose</button>
+                <button id="navpose-refresh" class="btn ghost" type="button" disabled data-i18n="ui.navpose.refresh">Refresh localization</button>
+              </div>
+            </div>
+          </div>
+          <div id="navgoal-card" class="card">
+            <h2 data-i18n="ui.navgoal.title">Destination</h2>
+            <p id="navgoal-status" class="nav-line" role="status" hidden></p>
+            <p id="navgoal-detail" class="note" hidden></p>
+            <p id="navgoal-help" class="note" hidden></p>
+            <p id="navgoal-readout" class="slam-summary" hidden></p>
+            <p id="navgoal-note" class="note" role="status" hidden></p>
+            <button id="navgoal-start" class="btn" type="button" disabled data-i18n="ui.navgoal.set">Choose destination</button>
+            <div id="navgoal-edit" class="navpose-edit" hidden>
+              <div class="navpose-rot">
+                <button id="navgoal-rot-l" class="tool-btn wide" type="button" aria-label="Rotate left 15°" data-i18n-aria="ui.navpose.rot_l">⟲ 15°</button>
+                <button id="navgoal-rot-r" class="tool-btn wide" type="button" aria-label="Rotate right 15°" data-i18n-aria="ui.navpose.rot_r">⟳ 15°</button>
+              </div>
+              <button id="navgoal-send" class="btn" type="button" disabled data-i18n="ui.navgoal.send">Send robot here…</button>
+              <button id="navgoal-cancel" class="btn ghost" type="button" data-i18n="ui.navpose.cancel">Cancel</button>
+            </div>
+            <div id="navstraight" class="navstraight">
+              <label for="navstraight-dist" data-i18n="ui.navstraight.label">Straight distance (m)</label>
+              <div class="navstraight-row">
+                <input id="navstraight-dist" type="number" inputmode="decimal" step="0.5" min="0.5" max="10" value="5">
+                <button id="navstraight-go" class="btn" type="button" disabled data-i18n="ui.navstraight.go">Drive straight</button>
+              </div>
+              <p id="navstraight-help" class="note" data-i18n="ui.navstraight.help">Drives forward along the robot’s current heading. The whole line must be free of walls.</p>
+            </div>
+            <button id="navgoal-stop" class="btn" type="button" hidden data-i18n="ui.navgoal.stop">Cancel trip — stop the robot</button>
+          </div>
+          <div id="navmap-card" class="card">
+            <h2 data-i18n="ui.nav.map.title">Map for Navigation</h2>
+            <p id="nav-map-current" class="nav-line"></p>
+            <p id="nav-map-running" class="nav-line" hidden></p>
+          </div>
+          <div id="maplib-card" class="card">
+            <div class="lib-head">
+              <h2 data-i18n="ui.lib.title">Map library</h2>
+              <span id="maplib-count" class="muted"></span>
+            </div>
+            <p id="maplib-note" class="note" hidden></p>
+            <p id="maplib-state" class="note" role="status"></p>
+            <a id="maplib-goto" class="btn ghost" href="#/mapping" hidden data-i18n="ui.lib.goto_mapping">Go to Mapping</a>
+            <div id="maplib-list" class="lib-grid"></div>
+          </div>
+        </aside>
+      </div>
+    </section>

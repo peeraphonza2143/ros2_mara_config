@@ -1,0 +1,35 @@
+<!--
+  [s2] BT สำหรับ AGV "หยุดรอ ไม่อ้อม" — copy จาก Nav2 Humble
+  navigate_to_pose_w_replanning_and_recovery.xml แล้วเปลี่ยนเฉพาะ RecoveryActions:
+    เดิม : ClearingActions → Spin 1.57 rad → Wait 5 s → BackUp 0.30 m
+    ใหม่ : ClearingActions → Wait 5 s     (ตัด Spin/BackUp: อันตรายถ้ามีคนยืนข้างรถ)
+  number_of_retries="6" คงเดิม: รอครบทุกรอบ (~1 ชม.) แล้ว goal จึงล้มเหลว (FAILED)
+-->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+      <PipelineSequence name="NavigateWithReplanning">
+        <RateController hz="1.0">
+          <RecoveryNode number_of_retries="1" name="ComputePathToPose">
+            <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
+          </RecoveryNode>
+        </RateController>
+        <RecoveryNode number_of_retries="1" name="FollowPath">
+          <FollowPath path="{path}" controller_id="FollowPath"/>
+          <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+        </RecoveryNode>
+      </PipelineSequence>
+      <ReactiveFallback name="RecoveryFallback">
+        <GoalUpdated/>
+        <RoundRobin name="RecoveryActions">
+          <Sequence name="ClearingActions">
+            <ClearEntireCostmap name="ClearLocalCostmap-Subtree" service_name="local_costmap/clear_entirely_local_costmap"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap-Subtree" service_name="global_costmap/clear_entirely_global_costmap"/>
+          </Sequence>
+          <Wait wait_duration="5"/>
+        </RoundRobin>
+      </ReactiveFallback>
+    </RecoveryNode>
+  </BehaviorTree>
+</root>

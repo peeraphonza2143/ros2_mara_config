@@ -4,10 +4,12 @@
 amcl:
   ros__parameters:
     use_sim_time: false
-    alpha1: 0.2
-    alpha2: 0.2
-    alpha3: 0.2
-    alpha4: 0.2
+    # [s2] โมเดลความคลาดเคลื่อนของ odom (เดิม 0.2 ทั้งสี่ = ค่าตั้งต้นของ AMCL) : odom ของหุ่นนี้ผ่าน EKF (แม่นกว่าตั้งต้น)
+    #      ลดเหลือ 0.1 → อนุภาคกระจายน้อยลงตอนเคลื่อนที่ σ ของ AMCL โตช้าลง (ถ้าตำแหน่งแกว่ง/ไหลหลง ให้ลองกลับเป็น 0.2)
+    alpha1: 0.1
+    alpha2: 0.1
+    alpha3: 0.1
+    alpha4: 0.1
     base_frame_id: base_link
     global_frame_id: map
     odom_frame_id: odom
@@ -31,8 +33,9 @@ amcl:
     lambda_short: 0.1
     recovery_alpha_fast: 0.0
     recovery_alpha_slow: 0.0
-    update_min_a: 0.2
-    update_min_d: 0.25
+    # [s2] ใช้สแกนปรับตำแหน่งถี่ขึ้น (เดิม 0.2 rad / 0.25 m) → σ หดบ่อยขึ้น แลกกับ CPU ที่เพิ่มเล็กน้อย
+    update_min_a: 0.1
+    update_min_d: 0.1
     transform_tolerance: 1.0
     save_pose_rate: 0.5
     tf_broadcast: true

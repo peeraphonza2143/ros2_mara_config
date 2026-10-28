@@ -1,0 +1,140 @@
+    <!-- ───────── Mapping: แผนที่สด + ตั้งค่า SLAM + ควบคุมด้วยมือ + บันทึกแผนที่ ───────── -->
+    <section data-view="mapping" class="view view-map" hidden>
+      <div class="map-layout">
+        <aside id="map-left" class="map-side map-left" aria-label="Display and SLAM settings" data-i18n-aria="ui.map.left_aria">
+          <div id="display-card" class="card">
+            <h2 data-i18n="ui.disp.title">Display</h2>
+            <h3 class="side-h" data-i18n="ui.disp.laser">Laser scan</h3>
+            <label class="disp-check"><input id="disp-laser" type="checkbox" checked>
+              <span data-i18n="ui.disp.show_laser">Show laser scan</span></label>
+            <div class="disp-row">
+              <label for="disp-size" data-i18n="ui.disp.size">Point size</label>
+              <input id="disp-size" type="range" min="1" max="8" step="1" value="3">
+              <output id="disp-size-out" for="disp-size">3 px</output>
+            </div>
+            <div class="disp-row">
+              <span id="disp-color-label" data-i18n="ui.disp.color">Color</span>
+              <div id="disp-colors" class="swatches" role="radiogroup" aria-labelledby="disp-color-label"></div>
+            </div>
+            <div class="disp-row">
+              <label for="disp-alpha" data-i18n="ui.disp.alpha">Opacity</label>
+              <input id="disp-alpha" type="range" min="10" max="100" step="5" value="100">
+              <output id="disp-alpha-out" for="disp-alpha">100 %</output>
+            </div>
+            <div class="disp-row">
+              <label for="disp-decay" data-i18n="ui.disp.decay">Decay time</label>
+              <input id="disp-decay" type="range" min="0" max="10" step="0.5" value="0">
+              <output id="disp-decay-out" for="disp-decay">0 s</output>
+            </div>
+            <h3 class="side-h" data-i18n="ui.disp.map">Map</h3>
+            <div class="disp-row">
+              <label for="disp-map-alpha" data-i18n="ui.disp.alpha">Opacity</label>
+              <input id="disp-map-alpha" type="range" min="20" max="100" step="5" value="100">
+              <output id="disp-map-alpha-out" for="disp-map-alpha">100 %</output>
+            </div>
+            <label class="disp-check"><input id="disp-robot" type="checkbox" checked>
+              <span data-i18n="ui.disp.robot">Show robot</span></label>
+            <label class="disp-check"><input id="disp-scalebar" type="checkbox" checked>
+              <span data-i18n="ui.disp.scalebar">Show scale bar</span></label>
+            <button id="disp-reset" class="btn ghost" type="button" data-i18n="ui.disp.reset">Reset display</button>
+          </div>
+          <div id="slam-card" class="card">
+            <h2 data-i18n="ui.slam.title">SLAM settings</h2>
+            <p id="slam-hint" class="note"></p>
+            <p id="slam-summary" class="slam-summary"></p>
+            <div id="slam-groups"></div>
+            <details id="slam-adv" class="tableview">
+              <summary data-i18n="ui.slam.advanced">Other SLAM settings (read-only)</summary>
+              <div class="table-scroll">
+                <table><tbody id="slam-adv-body"></tbody></table>
+              </div>
+            </details>
+            <p id="slam-note" class="note" role="status" hidden></p>
+            <div class="slam-actions">
+              <button id="slam-save" class="btn" type="button" disabled data-i18n="ui.slam.save">Save settings</button>
+              <button id="slam-restore" class="btn ghost" type="button" data-i18n="ui.slam.reset_all">Restore all defaults</button>
+            </div>
+          </div>
+        </aside>
+
+        <div class="map-center">
+          <div id="map-gate" class="card">
+            <div class="gate-head">
+              <span class="mode-ico"><svg class="ico"><use href="#i-map"/></svg></span>
+              <h2 data-i18n="ui.map.title">Mapping</h2>
+            </div>
+            <p id="map-gate-msg" class="gate-msg"></p>
+            <button id="map-start" class="btn" type="button" hidden data-i18n="ui.map.start">Start Mapping mode</button>
+            <button id="map-login" class="btn ghost" type="button" hidden data-i18n="ui.mode.login">Admin sign in</button>
+          </div>
+
+          <div id="map-live" class="card" hidden>
+            <h2 data-i18n="ui.map.live">Live map</h2>
+            <div id="map-box" class="map-box">
+              <canvas id="map-canvas" class="map-canvas" tabindex="0" role="img"></canvas>
+              <p id="map-wait" class="map-wait" data-i18n="ui.map.wait">Waiting for the first map… Drive the robot slowly to start scanning.</p>
+            </div>
+            <div class="map-tools">
+              <button id="map-zoom-in" class="tool-btn" type="button" aria-label="Zoom in" data-i18n-aria="ui.map.zoom_in">+</button>
+              <button id="map-zoom-out" class="tool-btn" type="button" aria-label="Zoom out" data-i18n-aria="ui.map.zoom_out">−</button>
+              <button id="map-fit" class="tool-btn wide" type="button" data-i18n="ui.map.fit">Fit</button>
+              <button id="map-center" class="tool-btn wide" type="button" data-i18n="ui.map.robot">Robot</button>
+            </div>
+            <p id="map-info" class="note"></p>
+            <p class="note" data-i18n="ui.map.tip">Drive slowly and steadily for a clean map.</p>
+          </div>
+
+        </div>
+
+        <aside id="map-right" class="map-side map-right" aria-label="Manual control and save map" data-i18n-aria="ui.map.right_aria">
+          <div id="drive-card" class="card">
+            <h2 data-i18n="ui.drive.title">Manual control</h2>
+            <p id="drive-status" class="drive-status" role="status" aria-live="polite"></p>
+            <div id="drive-input" class="seg two" role="group" aria-label="Control method" data-i18n-aria="ui.drive.input_aria">
+              <button id="drive-input-joy" type="button" class="pick-btn" aria-pressed="true" data-i18n="ui.drive.input_joy">Joystick</button>
+              <button id="drive-input-dpad" type="button" class="pick-btn" aria-pressed="false" data-i18n="ui.drive.input_dpad">Buttons</button>
+            </div>
+            <div id="joy" class="joy" tabindex="0" role="application" aria-label="Joystick: drag to drive the robot"
+                 data-i18n-aria="ui.drive.joy_aria">
+              <div class="joy-ring"></div>
+              <div id="joy-knob" class="joy-knob"></div>
+            </div>
+            <div id="dpad" class="dpad" role="group" aria-label="Direction buttons" data-i18n-aria="ui.drive.dpad_aria">
+              <button id="dp-fwd" class="dp-btn" type="button" aria-label="Forward" data-i18n-aria="ui.drive.fwd">▲</button>
+              <button id="dp-left" class="dp-btn" type="button" aria-label="Turn left" data-i18n-aria="ui.drive.left">⟲</button>
+              <button id="dp-back" class="dp-btn" type="button" aria-label="Backward" data-i18n-aria="ui.drive.back">▼</button>
+              <button id="dp-right" class="dp-btn" type="button" aria-label="Turn right" data-i18n-aria="ui.drive.right">⟳</button>
+            </div>
+            <button id="drive-stop" class="btn danger" type="button" data-i18n="ui.drive.stop">STOP</button>
+            <p id="drive-readout" class="drive-readout" aria-live="off"></p>
+            <h3 class="side-h" data-i18n="ui.drive.speeds">Speed limits</h3>
+            <div class="disp-row">
+              <label for="drive-vmax" data-i18n="ui.drive.vmax">Max forward speed</label>
+              <input id="drive-vmax" type="range" min="0.05" max="0.5" step="0.01" value="0.25">
+              <output id="drive-vmax-out" for="drive-vmax">0.25 m/s</output>
+            </div>
+            <div class="disp-row">
+              <label for="drive-wmax" data-i18n="ui.drive.wmax">Max turning speed</label>
+              <input id="drive-wmax" type="range" min="0.1" max="1" step="0.05" value="0.6">
+              <output id="drive-wmax-out" for="drive-wmax">0.6 rad/s</output>
+            </div>
+            <button id="drive-speed-reset" class="btn ghost" type="button" data-i18n="ui.drive.speed_reset">Reset speeds</button>
+            <p class="note" data-i18n="ui.drive.help">Hold to move, release to stop. Keyboard: W A S D or arrow keys, Space = stop.</p>
+          </div>
+          <div id="savemap-card" class="card">
+            <h2 data-i18n="ui.save.title">Save map</h2>
+            <label for="map-name" class="save-label" data-i18n="ui.save.name">Map name</label>
+            <input id="map-name" class="slam-input save-input" type="text" maxlength="48" autocomplete="off"
+                   autocapitalize="off" spellcheck="false" placeholder="factory_floor1"
+                   aria-describedby="map-name-rule map-name-err map-save-state">
+            <p id="map-name-rule" class="note" data-i18n="ui.save.rule">Use letters, digits, “-” or “_” (up to 48 characters).</p>
+            <p id="map-name-err" class="slam-err" role="alert" hidden></p>
+            <p id="map-save-state" class="note"></p>
+            <button id="map-save" class="btn" type="button" disabled data-i18n="ui.save.button">Save map</button>
+            <button id="map-save-stop" class="btn ghost" type="button" disabled data-i18n="ui.save.save_stop">Save and stop Mapping</button>
+            <p id="map-next" class="note" role="status" hidden></p>
+            <p id="map-last-saved" class="note"></p>
+          </div>
+        </aside>
+      </div>
+    </section>

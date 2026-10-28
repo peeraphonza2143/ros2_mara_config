@@ -1,0 +1,58 @@
+# ค่าตั้งต้นของเว็บแอป AGV (เฟส 1: อ่านสถานะอย่างเดียว)
+# แก้ไฟล์นี้ใน src/ แล้วต้อง colcon build --packages-select agv_web_app ใหม่
+web_server_node:
+  ros__parameters:
+    port: 8080                  # พอร์ตเว็บ (launch argument port:= ทับค่านี้ได้)
+    push_hz: 5.0                # ความถี่ที่ส่งสถานะไปเบราว์เซอร์
+    topic_timeout: 1.0          # ไม่ได้ข้อความนานเกินกี่วินาทีถือว่าเซนเซอร์ "หาย"
+    moving_speed: 0.02          # |v| (m/s) หรือ |w| (rad/s) เกินนี้ = "กำลังเคลื่อนที่"
+    loc_good: 0.15              # σ ตำแหน่ง AMCL (m) ที่ถือว่า "ดี"
+    loc_fair: 0.30              # σ ตำแหน่ง AMCL (m) ที่ถือว่า "พอใช้" (เกินนี้ = แย่)
+    odom_topic: /odometry/filtered
+    scan_topic: /scan_filtered
+    imu_topic: /imu/data
+    map_topic: /map             # แผนที่สด (slam_toolbox ตอน Mapping)
+    cmd_vel_topic: /cmd_vel     # เว็บแอป publish ความเร็ว 0 เท่านั้น (ตอน Reset all / ปิดแอป)
+    # ── ขับด้วยมือ (จอยบนหน้าเว็บ) : เพดานจริงอยู่ที่นี่ หน้าเว็บส่งเกินก็ถูกตัด ──
+    manual_max_linear: 0.5           # m/s
+    manual_max_angular: 1.0          # rad/s
+    manual_default_linear: 0.25      # ค่าเริ่มต้นของสไลเดอร์ความเร็ว
+    manual_default_angular: 0.6
+    manual_linear_accel: 0.6         # m/s² (เร่ง)  ไม่ให้กระชาก
+    manual_angular_accel: 1.5        # rad/s²
+    manual_linear_decel: 1.5         # m/s² (เบรกตอนปล่อยจอย/สัญญาณหลุด)
+    manual_angular_decel: 3.0
+    manual_heartbeat_timeout: 0.3    # ไม่ได้รับคำสั่งนานเกินนี้ (วินาที) → ลดความเร็วลงศูนย์เอง (deadman)
+    scan_overlay_hz: 5.0             # ความถี่ส่งจุดสแกนเลเซอร์ไปแสดงบนแผนที่
+    scan_overlay_points: 360         # จำนวนจุดสูงสุดต่อสแกน
+    maps_dir: ""                     # ที่เก็บแผนที่ ; ว่าง = <data_dir>/maps
+    slam_defaults_file: ""      # ไฟล์ค่า Default ของ SLAM ; ว่าง = mapper_params_s2_factory.yaml ของ agv_s2_bringup
+    nav_defaults_file: ""       # ไฟล์ค่า Default ของ Nav2 ; ว่าง = nav2_params_s2.yaml ของ agv_s2_bringup
+    drive_straight_max: 10.0    # Drive straight: ระยะสูงสุดต่อคำสั่ง (m) ; ทางตรงยาวกว่านี้สั่งต่อกันหลายรอบ
+    goal_clearance: 0.40        # จุดหมายที่ส่งจากเว็บต้องห่างผนัง/พื้นที่ไม่รู้อย่างน้อยเท่านี้ (m)
+    route_point_timeout: 600.0  # Route: รอต่อหนึ่งจุดได้นานสุดเท่านี้ (s) รวมเวลาที่ Nav2 หยุดรอสิ่งกีดขวาง ; เกิน = หยุดทั้ง Route
+    route_pass_radius: 0.9      # Route โหมด straight: รัศมีเลี้ยวโค้งมนที่จุด "ผ่านไปเลย" (m) ; ช่วงสั้นกว่าจะลดรัศมีเอง ถ้าต่ำกว่า 0.45 m = ปฏิเสธ
+    route_loc_grace: 15.0       # Route: ตำแหน่งไม่น่าเชื่อถือ (σ AMCL เกินเกณฑ์) → สั่ง AMCL อัปเดตเองแล้วรอได้เท่านี้ (s) ; ไม่ฟื้น = หยุด ; 0 = ไม่รอ
+    route_max_run: 7200.0       # Route: เวลารวมทั้งงานสูงสุด (s ไม่นับเวลาที่พัก) ; เกิน = หยุด (กันวนไม่จบจนลืม)
+    map_frame: map
+    base_frame: base_link
+
+    # ── Mode Manager + PIN ผู้ดูแล ────────────────────────────────────────
+    # (เตรียมไว้สำหรับ M2 — ตอนนี้ web_server_node ยังไม่อ่านค่าชุดนี้)
+    # ⚠ ต้องใส่เครื่องหมายคำพูดเสมอ เช่น "1234" — ถ้าไม่ใส่ YAML อ่านเป็นตัวเลข (และ "0000" จะกลายเป็น 0)
+    #   ถ้าอ่านเป็นตัวเลข node จะปิดฟังก์ชันสั่งงานและแจ้ง error
+    admin_pin: "091142"               # ว่าง = ปิดฟังก์ชันสั่งงานทั้งหมด (ไม่มีรหัสเริ่มต้น)
+    session_minutes: 30         # ไม่ใช้งานนานเท่านี้ต้องใส่ PIN ใหม่
+    data_dir: ~/agv_app_data    # เก็บ log ของโหมด (logs/) และสถิติ (stats.json: ระยะทาง/เวลาทำงาน)
+    # คำสั่งเปิดแต่ละโหมด — rviz:=false เสมอ (มินิพีซีบนหุ่นไม่ต้องมีหน้าต่าง RViz)
+    cmd_mapping: "ros2 launch agv_s2_bringup mapping_s2.launch.py rviz:=false"
+    cmd_manual: "ros2 launch agv_s2_bringup ekf_s2.launch.py"
+    cmd_navigation: "ros2 launch agv_s2_bringup nav_s2.launch.py rviz:=false"
+    nav_map_file: ""            # ว่าง = ใช้แผนที่ default ของ nav_s2.launch.py
+    # เวลารอ (วินาที)
+    mode_ready_timeout_mapping: 40.0
+    mode_ready_timeout_manual: 30.0
+    mode_ready_timeout_navigation: 60.0
+    mode_sigint_timeout: 20.0   # รอปิดแบบสุภาพ (Ctrl+C) ก่อนใช้ SIGTERM
+    mode_sigterm_timeout: 10.0  # รอ SIGTERM ก่อนใช้ SIGKILL
+    mode_settle_timeout: 30.0   # รอให้ node หายจาก ROS graph หลังปิด

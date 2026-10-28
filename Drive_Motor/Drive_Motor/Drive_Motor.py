@@ -5,6 +5,8 @@ from sensor_msgs.msg import JointState
 from zlac8015d.ZLAC8015D import Controller
 import math
 
+from Drive_Motor.watchdog import CmdWatchdog
+
 class ZlacDriverNode(Node):
     def __init__(self):
         super().__init__('zlac_driver_node')
@@ -16,11 +18,15 @@ class ZlacDriverNode(Node):
         self.declare_parameter('wheel_separation', 0.50)   # เมตร
         self.declare_parameter('wheel_radius', 0.1016)     # เมตร (ล้อ 8 นิ้ว)
         self.declare_parameter('max_rpm', 60.0)
+        # วินาที: ไม่ได้รับ /cmd_vel นานเกินนี้ → สั่งมอเตอร์หยุด ; 0.0 = ปิด (พฤติกรรมเดิม มอเตอร์วิ่งค้างตามคำสั่งล่าสุด)
+        self.declare_parameter('cmd_timeout', 0.0)
 
         port         = self.get_parameter('serial_port').value
         self.L       = self.get_parameter('wheel_separation').value
         self.R       = self.get_parameter('wheel_radius').value
         self.max_rpm = self.get_parameter('max_rpm').value
+        self.watchdog = CmdWatchdog(self.get_parameter('cmd_timeout').value)
+        self._watchdog_warned = False
 
         # --- ลำดับ init มอเตอร์ (ห้ามสลับขั้นตอน) ---
         # disable ก่อนเสมอ → ตั้งค่า → enable
@@ -41,8 +47,32 @@ class ZlacDriverNode(Node):
 
         # --- timer อ่าน encoder 20 Hz (ทุก 0.05 วินาที) ---
         self.create_timer(0.05, self.encoder_callback)
+        if self.watchdog.enabled:
+            self.get_logger().info(
+                f'cmd_timeout = {self.watchdog.timeout:.2f} s (ไม่มี /cmd_vel เกินนี้ → หยุดมอเตอร์)')
+
+    def _now_s(self):
+        return self.get_clock().now().nanoseconds * 1e-9
+
+    def check_watchdog(self):
+        """หมดเวลาแล้วสั่งหยุด ; สั่งไม่สำเร็จ (RS485 ขาด) จะลองใหม่ทุกรอบจนกว่าจะสำเร็จ"""
+        now = self._now_s()
+        if not self.watchdog.expired(now):
+            return
+        try:
+            self.motors.set_rpm(0, 0)
+        except Exception as e:
+            if not self._watchdog_warned:
+                self.get_logger().warn(f'watchdog สั่งหยุดไม่สำเร็จ (จะลองใหม่): {e}')
+                self._watchdog_warned = True
+            return
+        self.watchdog.mark_tripped()
+        self._watchdog_warned = False
+        self.get_logger().warn(
+            f'ไม่ได้รับ /cmd_vel นาน {self.watchdog.age(now):.2f} s (> cmd_timeout) → หยุดมอเตอร์')
 
     def cmd_callback(self, msg):
+        self.watchdog.feed(self._now_s())
         v = msg.linear.x    # ความเร็วเชิงเส้น (m/s)
         w = msg.angular.z   # ความเร็วเชิงมุม (rad/s)
 
@@ -66,6 +96,7 @@ class ZlacDriverNode(Node):
             self.get_logger().warn(f'Motor communication error: {e}')
 
     def encoder_callback(self):
+        self.check_watchdog()
         # อ่านค่า RPM จริงจากมอเตอร์ผ่าน RS485
         l_rpm, r_rpm = self.motors.get_rpm()
 
